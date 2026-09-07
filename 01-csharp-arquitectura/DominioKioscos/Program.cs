@@ -1,22 +1,19 @@
-﻿
-using DominioKioscos;
+﻿using DominioKioscos;
+using Microsoft.EntityFrameworkCore;
 
-IRepositorioKioscos repositorio = new RepositorioEnMemoria();
+using var db = new KioscosDbContext();
 
-var a = new Kiosco("ksk-001");
-var b = new Kiosco("ksk-002");
+// GUARDAR - solo si no existe, porque el indice unico no deja duplicados
+if (!db.Kioscos.Any(k => k.Codigo == "KSK-003"))
+{
+    var nuevo = new Kiosco("ksk-003");
+    db.Kioscos.Add(nuevo);
+    db.SaveChanges();
+    Console.WriteLine("\n>>> Kiosco guardado en la base");
+}
 
-repositorio.Guardar(a);
-repositorio.Guardar(b);
+// LEER
+var todos = db.Kioscos.ToList();
 
-a.RegistrarReporte(DateTime.Now);
-
-var monitor = new MonitorDeKioscos(repositorio);
-
-Console.WriteLine("--- Todos ---");
-foreach (var k in repositorio.ListarTodos()) Console.WriteLine(k);
-
-Console.WriteLine("");
-Console.WriteLine("--- En silencio ---");
-foreach (var k in monitor.EnSilencio(DateTime.Now, TimeSpan.FromMinutes(5)))
-    Console.WriteLine(k);
+Console.WriteLine($"\n>>> Kioscos en la base: {todos.Count}");
+foreach (var k in todos) Console.WriteLine(k);
